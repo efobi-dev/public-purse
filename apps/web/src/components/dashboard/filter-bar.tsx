@@ -3,6 +3,7 @@ import { Button } from "@public-purse/ui/components/button";
 import { Input } from "@public-purse/ui/components/input";
 import { X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import { ModeToggle } from "@/components/mode-toggle";
 import { incomeColor } from "@/lib/palette";
 
 /** Slim sticky bar: logo mark, country search typeahead, filter chip. */
@@ -39,12 +40,12 @@ export function FilterBar({
 
 	return (
 		<div className="sticky top-0 z-50 border-border/60 border-b bg-background/85 backdrop-blur">
-			<div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2">
+			<div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-2">
 				<a href="/" className="font-semibold font-serif text-sm tracking-tight">
 					The Public Purse
 				</a>
 
-				<div className="relative ml-auto w-56 md:w-64">
+				<div className="relative order-last w-full sm:order-none sm:ml-auto sm:w-56 md:w-64">
 					<Input
 						value={query}
 						placeholder="Search a country"
@@ -114,6 +115,7 @@ export function FilterBar({
 						All countries
 					</span>
 				)}
+				<ModeToggle />
 			</div>
 		</div>
 	);

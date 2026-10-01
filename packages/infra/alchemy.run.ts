@@ -17,9 +17,6 @@ const app = await alchemy("rev-dash", {
 export const web = await Vite("web", {
 	cwd: "../../apps/web",
 	assets: "dist",
-	bindings: {
-		VITE_SERVER_URL: alchemy.env.VITE_SERVER_URL!,
-	},
 });
 
 console.log(`Web    -> ${web.url}`);

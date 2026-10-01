@@ -1,6 +1,7 @@
 import type { CountryMeta } from "@public-purse/data/types";
 import createGlobe from "cobe";
 import { useEffect, useMemo, useRef } from "react";
+import { useTheme } from "@/components/theme-provider";
 import { COUNTRY_COORDS } from "@/lib/coords";
 import { hexToRgbFloats, incomeColor } from "@/lib/palette";
 
@@ -50,6 +51,9 @@ export function CountryGlobe({
 	onSelect: (iso3: string) => void;
 	size?: number;
 }) {
+	const { resolvedTheme } = useTheme();
+	const lightThemeRef = useRef(resolvedTheme === "light");
+	lightThemeRef.current = resolvedTheme === "light";
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const phiRef = useRef(0);
 	// Unclamped latitude: dragged past the limit it overshoots with rubber-band
@@ -57,6 +61,7 @@ export function CountryGlobe({
 	const thetaRawRef = useRef(0.22);
 	// Post-release spin (phi units per frame), handed off from the drag.
 	const momentumRef = useRef(0);
+	const mouseOverRef = useRef(false);
 	// Drag state: null when not dragging; tracks start point (for the tap
 	// threshold) and last event (for velocity handoff).
 	const dragRef = useRef<{
@@ -108,6 +113,7 @@ export function CountryGlobe({
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
+		const lightTheme = lightThemeRef.current;
 
 		const globe = createGlobe(canvas, {
 			width: size,
@@ -116,10 +122,10 @@ export function CountryGlobe({
 			theta: clampedThetaWithRubberband(thetaRawRef.current),
 			mapSamples: 16000,
 			mapBrightness: 5.5,
-			baseColor: [0.18, 0.18, 0.21],
-			markerColor: [0.85, 0.85, 0.92],
-			glowColor: [0.1, 0.1, 0.12],
-			dark: 1,
+			baseColor: lightTheme ? [0.88, 0.87, 0.83] : [0.18, 0.18, 0.21],
+			markerColor: lightTheme ? [0.16, 0.17, 0.19] : [0.85, 0.85, 0.92],
+			glowColor: lightTheme ? [0.64, 0.62, 0.56] : [0.1, 0.1, 0.12],
+			dark: lightTheme ? 0 : 1,
 			diffuse: 1.4,
 			markers,
 			devicePixelRatio: Math.min(window.devicePixelRatio ?? 1, 2),
@@ -147,6 +153,7 @@ export function CountryGlobe({
 				}
 				if (
 					Math.abs(momentumRef.current) <= AUTO_ROTATE_SPEED &&
+					!mouseOverRef.current &&
 					!reduceMotionRef.current
 				) {
 					phiRef.current += AUTO_ROTATE_SPEED;
@@ -167,6 +174,26 @@ export function CountryGlobe({
 		};
 		// rebuild only when the country set or size actually changes
 	}, [size, markers]);
+
+	// Update COBE's palette in place so theme changes don't reset the globe's
+	// rotation, active drag, or selected marker.
+	useEffect(() => {
+		if (resolvedTheme === "light") {
+			globeRef.current?.update({
+				baseColor: [0.88, 0.87, 0.83],
+				markerColor: [0.16, 0.17, 0.19],
+				glowColor: [0.64, 0.62, 0.56],
+				dark: 0,
+			});
+			return;
+		}
+		globeRef.current?.update({
+			baseColor: [0.18, 0.18, 0.21],
+			markerColor: [0.85, 0.85, 0.92],
+			glowColor: [0.1, 0.1, 0.12],
+			dark: 1,
+		});
+	}, [resolvedTheme]);
 
 	// Selection only re-emphasizes one marker via a cheap partial update();
 	// it must not recreate the globe or reset rotation.
@@ -209,7 +236,9 @@ export function CountryGlobe({
 		const dx = e.clientX - drag.lastX;
 		const dPhi = dx * 0.005;
 		phiRef.current += dPhi;
-		thetaRawRef.current -= (e.clientY - drag.y) * 0.005;
+		// COBE's theta direction is opposite the screen's vertical axis: add
+		// downward pointer movement so the globe follows the drag naturally.
+		thetaRawRef.current += (e.clientY - drag.y) * 0.005;
 		// Smoothed velocity in phi units per event, for momentum handoff.
 		drag.velPhi = drag.velPhi * 0.8 + dPhi * 0.2;
 		drag.lastX = e.clientX;
@@ -227,7 +256,16 @@ export function CountryGlobe({
 		e.currentTarget.releasePointerCapture(e.pointerId);
 	};
 	return (
-		<div className="relative" style={{ width: size, height: size }}>
+		<div
+			className="relative"
+			style={{ width: size, height: size }}
+			onMouseEnter={() => {
+				mouseOverRef.current = true;
+			}}
+			onMouseLeave={() => {
+				mouseOverRef.current = false;
+			}}
+		>
 			<canvas
 				ref={canvasRef}
 				className="cursor-grab touch-none select-none active:cursor-grabbing"

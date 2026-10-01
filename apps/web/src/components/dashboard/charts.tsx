@@ -36,12 +36,21 @@ function ResponsiveChart<
 	TYValue extends ChartValue,
 >({
 	width: _fixedWidth,
+	compactHeight,
 	...props
-}: Omit<ChartProps<TDatum, TXValue, TYValue>, "width"> & { width?: number }) {
+}: Omit<ChartProps<TDatum, TXValue, TYValue>, "width" | "height"> & {
+	width?: number;
+	height: number;
+	compactHeight?: number;
+}) {
 	const [ref, measuredWidth] = useContainerWidth<HTMLDivElement>();
 	return (
 		<div ref={ref} className="w-full min-w-0">
-			<Chart<TDatum, TXValue, TYValue> {...props} width={measuredWidth} />
+			<Chart<TDatum, TXValue, TYValue>
+				{...props}
+				width={measuredWidth}
+				height={measuredWidth < 520 ? compactHeight ?? props.height : props.height}
+			/>
 		</div>
 	);
 }
@@ -110,6 +119,7 @@ export function RankedBars({
 				definition={chart}
 				ariaLabel="Countries ranked by tax revenue as a share of GDP"
 				height={displayed.length * 14 + 48}
+				compactHeight={displayed.length * 12 + 44}
 				onSelect={(point) => {
 					const iso3 = point?.datum?.iso3;
 					if (typeof iso3 === "string") onSelect?.(iso3);
@@ -201,6 +211,7 @@ export function CapacityScatter({
 			definition={chart}
 			ariaLabel="Actual tax revenue versus modeled tax capacity, one dot per country"
 			height={480}
+			compactHeight={320}
 			onSelect={(point) => {
 				const iso3 = (point?.datum as { iso3?: string } | null | undefined)
 					?.iso3;
@@ -301,6 +312,7 @@ export function GapBandChart({ series }: { series: CountryYearRecord[] }) {
 			definition={chart}
 			ariaLabel="Actual tax revenue and modeled tax capacity over time, with the gap shaded"
 			height={380}
+			compactHeight={290}
 		/>
 	);
 }
@@ -397,22 +409,28 @@ export function CompositionOverview({ rows }: { rows: WorldSnapshotRow[] }) {
 			definition={chart}
 			ariaLabel="Average tax composition, low income versus high income countries"
 			height={220}
+			compactHeight={190}
 		/>
 	);
 }
 
 export function LegendComposition() {
 	return (
-		<div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
-			{COMPOSITION_CATEGORIES.map((c) => (
-				<span key={c.key} className="inline-flex items-center gap-1.5">
-					<span
-						className="inline-block size-2.5 rounded-[2px]"
-						style={{ background: COMPOSITION_COLORS[c.key] }}
-					/>
-					{c.label}
-				</span>
-			))}
+		<div className="space-y-1">
+			<p className="font-mono text-[11px] text-muted-foreground">
+				Color marks tax instrument
+			</p>
+			<div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
+				{COMPOSITION_CATEGORIES.map((c) => (
+					<span key={c.key} className="inline-flex items-center gap-1.5">
+						<span
+							className="inline-block size-2.5 rounded-[2px]"
+							style={{ background: COMPOSITION_COLORS[c.key] }}
+						/>
+						{c.label}
+					</span>
+				))}
+			</div>
 		</div>
 	);
 }
@@ -502,6 +520,7 @@ export function CompositionTime({ series }: { series: CountryYearRecord[] }) {
 			definition={chart}
 			ariaLabel="Tax composition over time"
 			height={380}
+			compactHeight={290}
 		/>
 	);
 }
@@ -582,6 +601,7 @@ export function PeerCompare({
 			definition={chart}
 			ariaLabel={`${countryName} compared with region and income-group averages`}
 			height={160}
+			compactHeight={140}
 		/>
 	);
 }
@@ -667,6 +687,7 @@ export function RatesTimeline({ series }: { series: CountryYearRecord[] }) {
 			definition={chart}
 			ariaLabel="Statutory PIT, CIT and VAT rates over time"
 			height={320}
+			compactHeight={260}
 		/>
 	);
 }
@@ -677,16 +698,21 @@ export function RatesTimeline({ series }: { series: CountryYearRecord[] }) {
 
 export function LegendIncomeGroups() {
 	return (
-		<div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
-			{INCOME_GROUPS.map((g) => (
-				<span key={g} className="inline-flex items-center gap-1.5">
-					<span
-						className="inline-block size-2.5 rounded-full"
-						style={{ background: incomeColor(g) }}
-					/>
-					{g.replace(" Income", "")}
-				</span>
-			))}
+		<div className="space-y-1">
+			<p className="font-mono text-[11px] text-muted-foreground">
+				Mark color encodes income group
+			</p>
+			<div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
+				{INCOME_GROUPS.map((g) => (
+					<span key={g} className="inline-flex items-center gap-1.5">
+						<span
+							className="inline-block size-2.5 rounded-full"
+							style={{ background: incomeColor(g) }}
+						/>
+						{g.replace(" Income", "")}
+					</span>
+				))}
+			</div>
 		</div>
 	);
 }

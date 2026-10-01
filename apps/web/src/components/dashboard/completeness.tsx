@@ -49,11 +49,14 @@ export function CompletenessHeatmap({
 
 	return (
 		<div className="min-w-0 overflow-x-auto">
-			<table className="w-full min-w-[560px] border-separate border-spacing-px text-[10px]">
+			<table
+				aria-label="Share of countries with tax revenue data by region and year, 1980 to 2024"
+				className="w-full min-w-[560px] border-separate border-spacing-px text-[10px]"
+			>
 				<tbody>
 					{regions.map(([region, total]) => (
 						<tr key={region}>
-							<th className="whitespace-nowrap pr-2 text-right align-middle font-normal text-muted-foreground">
+							<th scope="row" className="whitespace-nowrap pr-2 text-right align-middle font-normal text-muted-foreground">
 								{region}{" "}
 								<span className="text-muted-foreground/60">({total})</span>
 							</th>
@@ -72,9 +75,7 @@ export function CompletenessHeatmap({
 											background:
 												s == null
 													? "transparent"
-													: `oklch(0.85 ${s < 0.05 ? 0 : 0.02 + s * 0.06} ${
-															s < 0.05 ? 17 : 250
-														} / ${s === 0 ? 0.08 : 0.15 + s * 0.85})`,
+													: `oklch(0.85 0.06 250 / ${0.08 + s * 0.92})`,
 										}}
 									/>
 								);
@@ -85,12 +86,29 @@ export function CompletenessHeatmap({
 						<th />
 						{years.map((y) => (
 							<td key={y} className="pt-1 text-center text-muted-foreground">
-								{y % 10 === 0 ? String(y).slice(2) : ""}
+								{y % 5 === 0 ? String(y).slice(2) : ""}
 							</td>
 						))}
 					</tr>
 				</tbody>
 			</table>
+			<div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+				<span>Share of countries with data</span>
+				{[0.08, 0.31, 0.54, 0.77, 1].map((opacity, i) => (
+					<span key={opacity} className="inline-flex items-center gap-1">
+						<span
+							aria-hidden="true"
+							className="size-3 border border-border/50"
+							style={{ background: `oklch(0.85 0.06 250 / ${opacity})` }}
+						/>
+						{["0%", "25%", "50%", "75%", "100%"][i]}
+					</span>
+				))}
+				<span className="inline-flex items-center gap-1">
+					<span aria-hidden="true" className="size-3 border border-border/50" />
+					No data
+				</span>
+			</div>
 			<p className="mt-3 text-muted-foreground text-xs">
 				Share of countries in each region with tax-revenue data for that year.
 				The empty stretches are real: they are the story of what the sources do
@@ -128,17 +146,17 @@ export function CountryCoverageTimeline({
 
 	return (
 		<div className="min-w-0">
-			<div className="flex flex-wrap gap-px">
+			<p className="mb-2 font-mono text-[11px] text-muted-foreground">
+				Data source by year · {years[0]}–{years[years.length - 1]}
+			</p>
+			<div
+				className="flex flex-wrap gap-1"
+				role="img"
+				aria-label={`Tax data source coverage from ${years[0]} to ${years[years.length - 1]}`}
+			>
 				{years.map((y) => {
 					const primary = taxSet.has(y);
 					const imf = imfTaxSet.has(y);
-					const background = primary
-						? imf
-							? "#f4f4f5"
-							: "#b9b9c2"
-						: imf
-							? "#5f5f6b"
-							: "transparent";
 					return (
 						<div
 							key={y}
@@ -149,12 +167,18 @@ export function CountryCoverageTimeline({
 										: "primary source"
 									: imf
 										? "IMF only"
-										: "no data"
+									: "no data"
 							}`}
-							className={`h-5 w-2.5 ${
-								primary || imf ? "" : "border border-border/40"
+							className={`h-6 w-3 ${
+								primary && imf
+									? "coverage-both"
+									: primary
+										? "coverage-primary"
+										: imf
+											? "coverage-imf"
+											: "border border-border/40"
 							}`}
-							style={{ background }}
+							aria-hidden="true"
 						/>
 					);
 				})}
@@ -162,22 +186,22 @@ export function CountryCoverageTimeline({
 			<div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
 				<span className="inline-flex items-center gap-1.5">
 					<span
-						className="inline-block h-2.5 w-2"
-						style={{ background: "#f4f4f5" }}
+						aria-hidden="true"
+						className="coverage-both inline-block h-3 w-3 border border-border/50"
 					/>
 					Primary + IMF
 				</span>
 				<span className="inline-flex items-center gap-1.5">
 					<span
-						className="inline-block h-2.5 w-2"
-						style={{ background: "#b9b9c2" }}
+						aria-hidden="true"
+						className="coverage-primary inline-block h-3 w-3 border border-border/50"
 					/>
 					Primary source
 				</span>
 				<span className="inline-flex items-center gap-1.5">
 					<span
-						className="inline-block h-2.5 w-2"
-						style={{ background: "#5f5f6b" }}
+						aria-hidden="true"
+						className="coverage-imf inline-block h-3 w-3 border border-border/50"
 					/>
 					IMF only
 				</span>
@@ -212,11 +236,9 @@ export function CoverageTag({ meta }: { meta: CountryMeta }) {
 
 /** Transparency/attribution section — a content pillar, not a footnote. */
 export function Methodology({
-	number,
 	sources,
 	index,
 }: {
-	number: string;
 	sources: DataSourceMeta[];
 	index: CountryMeta[];
 }) {
@@ -230,7 +252,7 @@ export function Methodology({
 			className="mx-auto max-w-6xl scroll-mt-16 border-border/60 border-t px-4 py-16 md:py-24"
 		>
 			<p className="mb-3 font-mono text-muted-foreground text-xs uppercase tracking-widest">
-				{number} · Sources &amp; method
+				Sources &amp; method
 			</p>
 			<h2 className="max-w-2xl text-balance font-medium font-serif text-2xl leading-snug tracking-tight md:text-3xl">
 				Where every number comes from, and exactly what we don't know.

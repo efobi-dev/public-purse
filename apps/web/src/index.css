@@ -68,6 +68,32 @@ svg text {
 	outline-offset: 2px;
 }
 
+/* Source coverage timeline: matched light/dark values keep all three states
+ * distinguishable against either page surface. */
+.coverage-both {
+	background: oklch(0.78 0.07 75);
+}
+
+.coverage-primary {
+	background: oklch(0.62 0.08 75);
+}
+
+.coverage-imf {
+	background: oklch(0.4 0.045 75);
+}
+
+.dark .coverage-both {
+	background: oklch(0.87 0.07 75);
+}
+
+.dark .coverage-primary {
+	background: oklch(0.72 0.08 75);
+}
+
+.dark .coverage-imf {
+	background: oklch(0.55 0.045 75);
+}
+
 /* Search typeahead popover: scales in from its trigger (the input above),
  * never from center. */
 .dropdown-popover {

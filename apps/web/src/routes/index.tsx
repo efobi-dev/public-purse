@@ -118,24 +118,23 @@ function DashboardPage() {
 				onClear={() => select(null)}
 			/>
 
-			{/* Hero — dark, globe as the primary input. Fixed warm-charcoal palette
-			 so the dark globe always sits on a dark field, independent of theme. */}
-			<header className="relative overflow-hidden bg-[oklch(0.18_0.005_80)] text-[oklch(0.96_0.003_80)]">
+			{/* Globe-led hero with warm surfaces tuned for both theme modes. */}
+			<header className="relative overflow-hidden bg-[oklch(0.96_0.012_80)] text-[oklch(0.18_0.005_80)] dark:bg-[oklch(0.18_0.005_80)] dark:text-[oklch(0.96_0.003_80)]">
 				{/* subtle radial light behind the globe */}
 				<div
 					aria-hidden
-					className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_70%_40%,oklch(0.26_0.01_80),transparent_70%)]"
+					className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_70%_40%,oklch(0.91_0.02_80),transparent_70%)] dark:bg-[radial-gradient(60%_80%_at_70%_40%,oklch(0.26_0.01_80),transparent_70%)]"
 				/>
 				<div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 pt-16 pb-12 md:grid-cols-2 md:pt-24 md:pb-16">
 					<div>
-						<p className="mb-4 font-mono text-[oklch(0.65_0.005_80)] text-xs uppercase tracking-widest">
+						<p className="mb-4 font-mono text-[oklch(0.42_0.01_80)] text-xs uppercase tracking-widest dark:text-[oklch(0.65_0.005_80)]">
 							40+ years · 197 countries · three sources
 						</p>
 						<h1 className="text-balance font-medium font-serif text-4xl leading-[1.1] tracking-[-0.02em] md:text-[3.4rem]">
-							How does a country pay for itself, and is it collecting what it
+							How does a country finance itself, and is it collecting what it
 							could?
 						</h1>
-						<p className="mt-5 max-w-prose text-[oklch(0.75_0.005_80)] text-sm leading-relaxed [text-wrap:pretty] md:text-base">
+						<p className="mt-5 max-w-prose text-pretty text-[oklch(0.38_0.008_80)] text-sm leading-relaxed md:text-base dark:text-[oklch(0.75_0.005_80)]">
 							Built on tax revenue data from the UNU-WIDER Government Revenue
 							Dataset, the IMF, and a modeled picture of what each country could
 							realistically collect. Click a dot on the globe, or type a
@@ -169,7 +168,6 @@ function DashboardPage() {
 			)}
 
 			<Methodology
-				number={series && selectedMeta ? "06" : "05"}
 				sources={data.sources}
 				index={data.index}
 			/>
@@ -280,7 +278,6 @@ function OverviewSections({
 	return (
 		<>
 			<Section
-				number="01"
 				kicker="Level"
 				question="Which countries collect the most and the least, relative to their economies?"
 				aside={
@@ -307,7 +304,6 @@ function OverviewSections({
 			</Section>
 
 			<Section
-				number="02"
 				kicker="Capacity"
 				question="Are countries collecting as much tax as they could?"
 				aside={
@@ -331,7 +327,6 @@ function OverviewSections({
 			</Section>
 
 			<Section
-				number="03"
 				kicker="Composition"
 				question="What is a government actually taxing to fund itself?"
 				aside={
@@ -350,7 +345,6 @@ function OverviewSections({
 			</Section>
 
 			<Section
-				number="04"
 				kicker="Coverage"
 				question="How much of this picture do we actually have?"
 				aside={<CompletenessHeatmap index={index} coverage={coverage} />}
@@ -407,7 +401,6 @@ function CountrySections({
 		<>
 			<Section
 				id="country-capacity"
-				number="01"
 				kicker="Capacity over time"
 				question={`Is ${meta.name} collecting as much tax as it could?`}
 				aside={
@@ -431,7 +424,6 @@ function CountrySections({
 			</Section>
 
 			<Section
-				number="02"
 				kicker="Composition"
 				question={`What does ${meta.name}'s government actually tax?`}
 				aside={
@@ -450,7 +442,6 @@ function CountrySections({
 			</Section>
 
 			<Section
-				number="03"
 				kicker="Peers"
 				question={`How does ${meta.name} compare to its peers?`}
 				aside={
@@ -470,7 +461,6 @@ function CountrySections({
 			</Section>
 
 			<Section
-				number="04"
 				kicker="Statutory rates"
 				question={`What are the rates on paper in ${meta.name}?`}
 				aside={
@@ -488,7 +478,6 @@ function CountrySections({
 			</Section>
 
 			<Section
-				number="05"
 				kicker="Coverage"
 				question={`How complete is the record for ${meta.name}?`}
 				aside={
